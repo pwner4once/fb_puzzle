@@ -77,21 +77,6 @@ public class Main {
         }
     }
 
-    private static ArrayList<String> readFile(String filename) {
-        ArrayList<String> raw_data = new ArrayList<String>();
-        String str;
-        try {
-            BufferedReader in = new BufferedReader(new FileReader(filename));
-            String line = "";
-            while ((line = in.readLine()) != null){
-                raw_data.add(line);
-            }
-            in.close();
-        } catch (IOException e) {
-            System.out.print(e.toString());
-        }
-        return raw_data;
-    }
     /**
         Meep meep!
 
@@ -120,6 +105,7 @@ public class Main {
             System.out.println("Meep meep!");
         }
     }
+    
     /**
      *
     Liar, Liar
@@ -159,11 +145,94 @@ public class Main {
     3 2
      */
     private static void Liar_Liar(String filename) {
-        ArrayList grp1 = new ArrayList();
-        ArrayList grp2 = new ArrayList();
+        ArrayList<String> grp1 = new ArrayList<String>();
+        ArrayList<String> grp2 = new ArrayList<String>();
         ArrayList<String> file = new ArrayList<String>();
         file = readFile(filename);
-        
+        int numberOfAccusation = Integer.parseInt(file.get(0));
+        int tracker = 1;
+        boolean grpMade = false;
+        while(numberOfAccusation > 0){
+            String line = file.get(tracker++);
+            String[] pieces = line.split(" ");
+            ArrayList<String> pieces_alns = new ArrayList<String>();
+            for (int index = 0; index < pieces.length; index++) {
+                if (!pieces[index].equals("")) {
+                    pieces_alns.add(pieces[index]);
+                }
+            }
+            String[] pieces_ns = new String[pieces_alns.size()];
+            pieces_alns.toArray(pieces_ns);
+
+            if (pieces_ns.length == 2){
+                if (!grpMade) {
+                    grpMade = true;
+                    grp1.add(pieces_ns[0]);
+                    for (int i = 0; i < Integer.parseInt(pieces_ns[1]); i++) {
+                        grp2.add(file.get(tracker++));
+                    }
+                }
+                else{
+                    ArrayList<String> accuserGrp = null;
+                    ArrayList<String> accusedGrp = null;
+                    String accuser = pieces_ns[0];
+                    // pieces[0] : accuser name
+                    // pieces[1] : number of accused person
+
+                    // try to determine accuser's group
+                    if (grp1.contains(accuser)){
+                        accuserGrp = grp1;
+                        accusedGrp = grp2;
+                    }
+                    else if (grp2.contains(accuser)){
+                        accuserGrp = grp2;
+                        accusedGrp = grp1;
+                    }
+
+                    // adding all accused person to apropriate grp
+                    for (int counter = 0; counter < Integer.parseInt(pieces_ns[1]); counter++) {
+                        String accused = file.get(tracker++);
+                        if (accusedGrp == null || accuserGrp == null){
+                            if (grp1.contains(accused)){
+                                accusedGrp = grp1;
+                                accuserGrp = grp2;
+                            } else{
+                                accusedGrp = grp2;
+                                accuserGrp = grp1;
+                            }
+                        }
+                        else{
+                            if (!accusedGrp.contains(accused))
+                            accusedGrp.add(accused);
+                        }
+                    }
+                    if (!accuserGrp.contains(accuser))
+                        accuserGrp.add(accuser);
+                }
+                numberOfAccusation--;
+            }
+        }
+
+        if (grp1.size() > grp2.size())
+            System.out.println(grp1.size() + " " + grp2.size());
+        else
+            System.out.println(grp2.size() + " " + grp1.size());
     }
 
+
+    private static ArrayList<String> readFile(String filename) {
+        ArrayList<String> raw_data = new ArrayList<String>();
+        String str;
+        try {
+            BufferedReader in = new BufferedReader(new FileReader(filename));
+            String line = "";
+            while ((line = in.readLine()) != null){
+                raw_data.add(line);
+            }
+            in.close();
+        } catch (IOException e) {
+            System.out.print(e.toString());
+        }
+        return raw_data;
+    }
 }
